@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jev by TypeSafe AI — Interactive Talk & Pro Research Dossier</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            lime: {
+              DEFAULT: '#b4f34d',
+              dim: 'rgba(180, 243, 77, 0.15)',
+              glow: 'rgba(180, 243, 77, 0.35)',
+            },
+            dark: {
+              900: '#090a0d',
+              800: '#11131a',
+              700: '#191d26',
+              600: '#232936',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for crisp LaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#090a0d] text-gray-100 antialiased select-none overflow-hidden">
+
+  <!-- App Root Container -->
+  <div id="app-root" class="relative w-screen h-screen flex flex-col justify-between">
+
+    <!-- Top Global App Bar -->
+    <header class="h-14 border-b border-gray-800/80 px-4 md:px-8 flex items-center justify-between bg-[#090a0d]/90 backdrop-blur-md z-40">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-lime/10 border border-lime flex items-center justify-center">
+          <span class="font-mono font-black text-lime text-base tracking-tighter">J</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="font-bold text-white tracking-tight text-base">Jev</span>
+          <span class="text-xs font-mono text-gray-400">by TypeSafe AI</span>
+        </div>
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-lime/10 text-lime border border-lime/30 font-bold">
+          SYSTEM 1 MODEL
+        </span>
+      </div>
+
+      <!-- Mode Switcher & Tools -->
+      <div class="flex items-center gap-2.5">
+        <!-- View Mode Switcher -->
+        <div class="mode-toggle-group">
+          <button id="btn-mode-split" onclick="toggleViewMode('split')" class="mode-toggle-btn active">
+            🔬 Pro Split View
+          </button>
+          <button id="btn-mode-focus" onclick="toggleViewMode('focus')" class="mode-toggle-btn">
+            ⛶ Slide Focus
+          </button>
+        </div>
+
+        <button onclick="toggleSlideMenu(true)" class="btn-pill">
+          <span>📑</span>
+          <span class="hidden md:inline">Index</span>
+          <span class="text-xs font-mono text-lime font-bold">44 Slides</span>
+        </button>
+
+        <button onclick="toggleDrawer(true)" class="btn-pill btn-pill-lime">
+          <span>🔬</span>
+          <span class="hidden sm:inline">Workbench</span>
+        </button>
+
+        <button onclick="toggleFullscreen()" class="btn-icon" title="Toggle Fullscreen">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Presentation Stage -->
+    <main id="slide-viewport">
+      <div class="slide-wrapper">
+        <div class="slide-content">
+          <!-- Top Metadata within slide -->
+          <div class="slide-top-bar">
+            <div id="slide-breadcrumbs" class="slide-breadcrumbs"></div>
+            <div id="slide-badge-container"></div>
+          </div>
+
+          <!-- Dynamic Dual-Column Content rendered by app.js -->
+          <div id="slide-container" class="slide-content animate-in-next">
+            <!-- Dynamic Content -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <footer class="bottom-nav-bar">
+      <!-- Top Glowing Progress Line -->
+      <div id="progress-bar" class="progress-track" style="width: 2.2%;"></div>
+
+      <!-- Left controls: Prev/Next & Slide Subindex -->
+      <div class="flex items-center gap-3">
+        <button onclick="prevSlide()" class="btn-icon" title="Previous Slide (← / PageUp)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+
+        <div class="nav-counter">
+          <span id="nav-counter-text" class="font-bold text-white font-mono text-sm tracking-wide">1 / 16</span>
+        </div>
+
+        <button onclick="nextSlide()" class="btn-icon" title="Next Slide (→ / Spacebar)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Center helper -->
+      <div class="hidden md:flex items-center gap-2 text-xs font-mono text-gray-500">
+        <span>Use</span>
+        <kbd class="px-1.5 py-0.5 bg-gray-900 border border-gray-800 rounded text-gray-300">←</kbd>
+        <kbd class="px-1.5 py-0.5 bg-gray-900 border border-gray-800 rounded text-gray-300">→</kbd>
+        <span>or</span>
+        <kbd class="px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-gray-300">Space</kbd>
+        <span>to flip</span>
+      </div>
+
+      <!-- Right position dots -->
+      <div class="flex items-center gap-4">
+        <div id="nav-dots-container" class="nav-dots">
+          <div class="nav-dot active"></div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Slide Jump Modal (Index of 44 Slides) -->
+    <div id="slide-menu-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[#12141c] border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-[#0d0f15]">
+          <div class="font-bold text-white text-sm font-mono flex items-center gap-2">
+            <span>📑</span>
+            <span>Presentation Index (16 Acts · 44 Slides with Expert Dossiers)</span>
+          </div>
+          <button onclick="toggleSlideMenu(false)" class="text-gray-400 hover:text-white font-mono text-lg px-2">✕</button>
+        </div>
+        <div id="slide-menu-list" class="p-3 overflow-y-auto space-y-1 flex-1 divide-y divide-gray-800/30">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Deep-Dive & Research Workbench Drawer -->
+    <div class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside class="drawer-panel">
+      <!-- Drawer Header -->
+      <div class="p-4 border-b border-gray-800 bg-[#0d0f15] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded bg-lime/10 border border-lime flex items-center justify-center font-mono font-bold text-lime text-xs">
+            RL
+          </div>
+          <div>
+            <h2 class="font-bold text-white text-base leading-tight">Jev Research & Benchmark Workbench</h2>
+            <p class="text-xs font-mono text-gray-400">Synthesizing findings from all 8 community & technical sources</p>
+          </div>
+        </div>
+        <button onclick="toggleDrawer(false)" class="btn-icon">✕</button>
+      </div>
+
+      <!-- Drawer Tabs -->
+      <div class="flex border-b border-gray-800 bg-[#11131a] px-4 gap-2 overflow-x-auto text-xs font-mono">
+        <button onclick="switchTab('arch')" class="tab-btn active py-3 px-3 border-b-2 border-lime text-lime font-bold hover:text-white" data-tab="arch">
+          1. Architecture Unmasked
+        </button>
+        <button onclick="switchTab('bench')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="bench">
+          2. JevBench Leaderboard
+        </button>
+        <button onclick="switchTab('clones')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="clones">
+          3. Open Clones (Laya & Kev)
+        </button>
+        <button onclick="switchTab('campusx')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="campusx">
+          4. Live CampusX Sandbox
+        </button>
+        <button onclick="switchTab('demos')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="demos">
+          5. Community Demos & Limits
+        </button>
+      </div>
+
+      <!-- Drawer Body Content Panels -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
+
+        <!-- TAB 1: Architecture Unmasked -->
+        <div id="tab-panel-arch" class="tab-panel space-y-6">
+          <div class="border-b border-gray-800 pb-3">
+            <span class="text-xs font-mono uppercase text-lime">Archer Hume 10,000 API-Probe Study</span>
+            <h3 class="text-xl font-bold text-white mt-1">Jev’s Architecture Unmasked: 8 Components</h3>
+            <p class="text-xs text-gray-400 mt-1">Source: <code class="text-gray-300">archerhume.com/posts/jevs-architecture-unmasked</code></p>
+          </div>
+
+          <div class="p-5 bg-black/50 border border-gray-800 rounded-xl space-y-3 font-mono text-xs">
+            <div class="text-gray-400 uppercase text-[10px] tracking-wider font-bold">The Proposed Computational Graph</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div class="p-3 bg-[#161a22] border border-gray-700 rounded-lg">
+                <div class="text-lime font-bold mb-1">Prefix Shared State</div>
+                <div class="text-gray-400 text-[11px]">KV cached once. Up to 32,768 tokens. Processed across all questions simultaneously.</div>
+              </div>
+              <div class="p-3 bg-[#161a22] border border-gray-700 rounded-lg">
+                <div class="text-blue-400 font-bold mb-1">Question Tree Suffixes</div>
+                <div class="text-gray-400 text-[11px]">Isolated question branches. Tree attention mask prevents cross-question leakage.</div>
+              </div>
+              <div class="p-3 bg-[#161a22] border border-gray-700 rounded-lg">
+                <div class="text-purple-400 font-bold mb-1">Linear Readout Head</div>
+                <div class="text-gray-400 text-[11px]">z = Wh + b + softmax/sigmoid. Zero autoregressive decode steps.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-[#12141a] border border-gray-800 rounded-xl space-y-2">
+              <div class="text-xs font-bold text-lime font-mono">1. Causal Decoder vs Encoder</div>
+              <p class="text-xs text-gray-300 leading-relaxed">
+                Jev acts encoder-like, but Hume concludes it is a <strong>causal transformer decoder</strong> (likely sparse MoE with ~10B active parameters out of 70B+). 30k tokens were processed in ~160ms. MMLU-Pro accuracy is 84.6%, indicating massive pretraining weights.
+              </p>
+            </div>
+
+            <div class="p-4 bg-[#12141a] border border-gray-800 rounded-xl space-y-2">
+              <div class="text-xs font-bold text-lime font-mono">2. Listwise Option Cross-Attention</div>
+              <p class="text-xs text-gray-300 leading-relaxed">
+                When an irrelevant 5th option (<em>"weather caused it"</em>) was added to a 4-option set, the log-odds between existing options shifted by <strong>-0.28</strong> across 10 randomized blocks. This proves options attend to each other, resolving contextual terms like <em>"none of the above"</em>.
+              </p>
+            </div>
+
+            <div class="p-4 bg-[#12141a] border border-gray-800 rounded-xl space-y-2">
+              <div class="text-xs font-bold text-lime font-mono">3. Context Limits & Token Accounting</div>
+              <p class="text-xs text-gray-300 leading-relaxed">
+                Max branch length: <strong>32,768 tokens (2¹⁵)</strong>.<br/>
+                Max total packed request: <strong>65,536 tokens (2¹⁶)</strong>.<br/>
+                State is counted once: a 23k-token state with 1,000 questions fits in one call without duplicating context.
+              </p>
+            </div>
+
+            <div class="p-4 bg-[#12141a] border border-gray-800 rounded-xl space-y-2">
+              <div class="text-xs font-bold text-lime font-mono">4. RLCD: Proper Scoring Rule</div>
+              <p class="text-xs text-gray-300 leading-relaxed">
+                Trained via proper scoring rules (Brier loss & log-loss). On a 1,200-item MMLU sample, Jev achieved an <strong>Expected Calibration Error (ECE) of 0.0313</strong>, fixing standard LLM overconfidence.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: JevBench Leaderboard -->
+        <div id="tab-panel-bench" class="tab-panel hidden space-y-6">
+          <div class="border-b border-gray-800 pb-3">
+            <span class="text-xs font-mono uppercase text-lime">Benchmark Heaven (JevBench)</span>
+            <h3 class="text-xl font-bold text-white mt-1">Jev-Class Model Leaderboard</h3>
+            <p class="text-xs text-gray-400 mt-1">Source: <code class="text-gray-300">benchmarkheaven.com/jev-models</code> · Evaluated on 4 equal 25% axes</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-mono text-xs border border-gray-800">
+              <thead class="bg-[#141720] text-gray-400">
+                <tr>
+                  <th class="p-2.5">Rank</th>
+                  <th class="p-2.5">Model / System</th>
+                  <th class="p-2.5">Base Engine</th>
+                  <th class="p-2.5 text-lime">Overall</th>
+                  <th class="p-2.5">Intelligence</th>
+                  <th class="p-2.5">Calibration</th>
+                  <th class="p-2.5">Latency</th>
+                  <th class="p-2.5">Cost / 1k</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-800/60 bg-[#0d0f15]">
+                <tr class="hover:bg-gray-800/40">
+                  <td class="p-2.5 font-bold text-lime">#1</td>
+                  <td class="p-2.5 font-bold text-white">decider-4b v2 <span class="text-[10px] text-gray-500">(Mapika)</span></td>
+                  <td class="p-2.5 text-gray-400">4B Dense</td>
+                  <td class="p-2.5 font-bold text-lime">64.1</td>
+                  <td class="p-2.5">49.4</td>
+                  <td class="p-2.5">75.0</td>
+                  <td class="p-2.5 font-bold text-green-400">0.02 s (20ms)</td>
+                  <td class="p-2.5">$0.020</td>
+                </tr>
+                <tr class="bg-lime/5 hover:bg-lime/10">
+                  <td class="p-2.5 font-bold text-lime">#2</td>
+                  <td class="p-2.5 font-bold text-lime">Jev 1.13.0 API <span class="text-[10px] text-gray-400">(TypeSafe)</span></td>
+                  <td class="p-2.5 text-gray-300">MoE (~10B active)</td>
+                  <td class="p-2.5 font-bold text-lime">63.3</td>
+                  <td class="p-2.5 font-bold text-white">53.1 (Top)</td>
+                  <td class="p-2.5 font-bold text-lime">76.3 (Top)</td>
+                  <td class="p-2.5">0.65 s (650ms)</td>
+                  <td class="p-2.5">$0.040</td>
+                </tr>
+                <tr class="hover:bg-gray-800/40">
+                  <td class="p-2.5 text-gray-400">#7</td>
+                  <td class="p-2.5 text-gray-200">JEV Qwen3.5-9B NVFP4</td>
+                  <td class="p-2.5 text-gray-400">Qwen3.5-9B</td>
+                  <td class="p-2.5">57.3</td>
+                  <td class="p-2.5">46.8</td>
+                  <td class="p-2.5">67.7</td>
+                  <td class="p-2.5">0.19 s</td>
+                  <td class="p-2.5">$0.077</td>
+                </tr>
+                <tr class="hover:bg-gray-800/40">
+                  <td class="p-2.5 text-gray-400">#8</td>
+                  <td class="p-2.5 text-gray-200">Winnow-12B Q8</td>
+                  <td class="p-2.5 text-gray-400">12B Q8</td>
+                  <td class="p-2.5">56.6</td>
+                  <td class="p-2.5">48.3</td>
+                  <td class="p-2.5">64.8</td>
+                  <td class="p-2.5">0.60 s</td>
+                  <td class="p-2.5">$0.037</td>
+                </tr>
+                <tr class="hover:bg-gray-800/40">
+                  <td class="p-2.5 text-gray-400">#16</td>
+                  <td class="p-2.5 text-blue-300 font-bold">Kev-4B <span class="text-[10px] text-gray-500">(Jared Palmer)</span></td>
+                  <td class="p-2.5 text-gray-400">Qwen3.5-4B</td>
+                  <td class="p-2.5">52.3</td>
+                  <td class="p-2.5">43.1</td>
+                  <td class="p-2.5">61.5</td>
+                  <td class="p-2.5">0.33 s (330ms)</td>
+                  <td class="p-2.5">$0.019</td>
+                </tr>
+                <tr class="hover:bg-gray-800/40">
+                  <td class="p-2.5 text-gray-400">#41</td>
+                  <td class="p-2.5 text-purple-300 font-bold">Laya <span class="text-[10px] text-gray-500">(ConvAI)</span></td>
+                  <td class="p-2.5 text-gray-400">ModernBERT 421M</td>
+                  <td class="p-2.5">49.9</td>
+                  <td class="p-2.5">36.1</td>
+                  <td class="p-2.5">63.7</td>
+                  <td class="p-2.5 font-bold text-green-400">0.033 s (33ms)</td>
+                  <td class="p-2.5 font-bold text-lime">$0.0029 (0.07x)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: Open Clones -->
+        <div id="tab-panel-clones" class="tab-panel hidden space-y-6">
+          <div class="border-b border-gray-800 pb-3">
+            <span class="text-xs font-mono uppercase text-lime">Open Weight Reconstructions</span>
+            <h3 class="text-xl font-bold text-white mt-1">Laya & Kev: Running System 1 Locally</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-5 bg-[#12141b] border border-purple-500/30 rounded-xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-base font-bold text-purple-300">Laya (ConvAI Innovations)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 bg-purple-950 text-purple-200 border border-purple-800 rounded">Apache 2.0</span>
+              </div>
+              <p class="text-xs text-gray-300">
+                Created by <strong>Nandakishor Mukkunnoth</strong>. Grounded in his March 2025 (arXiv:2503.23303) and Sept 2025 (arXiv:2510.01237) non-autoregressive decision papers.
+              </p>
+              <ul class="text-xs font-mono text-gray-400 space-y-1 list-disc pl-4">
+                <li><strong>Latency:</strong> 32.8 ms (7.2 ms per question batched) on single T4 GPU.</li>
+                <li><strong>Base:</strong> ModernBERT-large (421M params). Bidirectional encoder.</li>
+                <li><strong>Languages:</strong> 100+ languages verified across a 51-language sweep.</li>
+                <li><strong>Cost:</strong> $0.0029 per 1k decisions (0.07× Jev cost).</li>
+              </ul>
+              <div class="p-2.5 bg-black/60 rounded text-xs font-mono text-purple-300 border border-gray-800">
+                pip install laya
+              </div>
+            </div>
+
+            <div class="p-5 bg-[#12141b] border border-blue-500/30 rounded-xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-base font-bold text-blue-300">Kev (Jared Palmer)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 bg-blue-950 text-blue-200 border border-blue-800 rounded">Apache 2.0</span>
+              </div>
+              <p class="text-xs text-gray-300">
+                Built directly on Qwen 3.5 and Qwen 3.8 base weights using Archer Hume's reverse-engineering blueprint.
+              </p>
+              <ul class="text-xs font-mono text-gray-400 space-y-1 list-disc pl-4">
+                <li><strong>Sizes:</strong> Kev-0.8B (runs on Mac/laptop), 4B, 9B, and Kev-27B.</li>
+                <li><strong>Unseen Task Accuracy:</strong> Kev-27B hits <strong>89.6%</strong> (Brier score 0.164), surpassing hosted Jev (85.7%).</li>
+                <li><strong>Compatibility:</strong> Native drop-in for TypeSafe's Python SDK via <code>/v1/systemone</code>.</li>
+              </ul>
+              <div class="p-2.5 bg-black/60 rounded text-xs font-mono text-blue-300 border border-gray-800">
+                uv run python -m kev.serve --run jaredpalmer/kev-4b
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Live CampusX Sandbox -->
+        <div id="tab-panel-campusx" class="tab-panel hidden space-y-5">
+          <div class="border-b border-gray-800 pb-3 flex justify-between items-center">
+            <div>
+              <span class="text-xs font-mono uppercase text-lime">Interactive Code Sandbox</span>
+              <h3 class="text-xl font-bold text-white mt-1">CampusX: Smartphone Review Analyzer</h3>
+              <p class="text-xs text-gray-400">Evaluates 14 questions (7 topics × Noul + Score) in a single 120ms pass</p>
+            </div>
+            <div id="campusx-latency" class="text-xs font-mono px-3 py-1 bg-lime/10 border border-lime text-lime rounded">
+              Ready
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="text-xs font-mono text-gray-300 uppercase">Review Text (State)</label>
+            <textarea id="campusx-input" rows="3" class="w-full bg-[#0d0f15] border border-gray-800 rounded-lg p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-lime">The 200MP camera takes unbelievable portraits, but the battery drains completely by 4 PM. Performance in games is butter smooth, display is sharp, but build feels cheap plastic.</textarea>
+            <div class="flex justify-between items-center">
+              <button onclick="runCampusXAnalysis()" class="btn-pill btn-pill-lime">
+                ⚡ Run 14 Jev Questions (~128ms)
+              </button>
+              <span class="text-xs font-mono text-gray-500">Confidence Gating: p(mention) ≥ 0.50</span>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <div class="text-xs font-mono text-gray-400 uppercase mb-2">Flipkart-Style Topic Ratings</div>
+            <div id="campusx-results" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-white">Camera</div>
+                  <div class="text-xs font-mono text-lime">Mentioned Prob: 0.96 ✓</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-base font-bold text-lime font-mono">4.9 ★</div>
+                  <div class="text-[10px] font-mono text-gray-400">Score: 4/4</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-sm text-white">Battery</div>
+                  <div class="text-xs font-mono text-lime">Mentioned Prob: 0.92 ✓</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-base font-bold text-red-400 font-mono">1.2 ★</div>
+                  <div class="text-[10px] font-mono text-gray-400">Score: 0/4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: Demos & Limits -->
+        <div id="tab-panel-demos" class="tab-panel hidden space-y-6">
+          <div class="border-b border-gray-800 pb-3">
+            <span class="text-xs font-mono uppercase text-lime">Ecosystem & Production Readiness</span>
+            <h3 class="text-xl font-bold text-white mt-1">Awesome Jev Use Cases & Documented Limits</h3>
+            <p class="text-xs text-gray-400 mt-1">From 74 viral demos (127k likes, 551 builds) & TypeSafe's Jaggedness Docs</p>
+          </div>
+
+          <div class="space-y-3">
+            <h4 class="text-sm font-bold text-white font-mono uppercase">Top Community Builds</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg">
+                <div class="font-bold text-white">Claude Context Compactor (10,435 likes)</div>
+                <p class="text-gray-400 mt-1">Scores historical turns; compresses prompt by 70% before invoking Claude 3.5 Sonnet.</p>
+              </div>
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg">
+                <div class="font-bold text-white">Browser-Use Flight Search (8,723 likes)</div>
+                <p class="text-gray-400 mt-1">Evaluates DOM safety and stuck-state detection every 120ms without stalling the agent loop.</p>
+              </div>
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg">
+                <div class="font-bold text-white">Twitter Slop Filter (7,180 likes)</div>
+                <p class="text-gray-400 mt-1">Chrome extension filtering low-effort AI posts in real-time as users scroll Twitter.</p>
+              </div>
+              <div class="p-3 bg-black/40 border border-gray-800 rounded-lg">
+                <div class="font-bold text-white">Sub-Cent Triage (3,853 likes)</div>
+                <p class="text-gray-400 mt-1">Triaged 500 emails for 3.5 cents ($0.035) total; LLM alternative was $3.99.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-red-950/20 border border-red-800/40 rounded-xl space-y-2">
+            <div class="text-xs font-mono font-bold text-red-400 uppercase">Documented Limits of Jev 1.13</div>
+            <ul class="text-xs font-mono text-gray-300 space-y-1.5 list-disc pl-4">
+              <li><strong>Reads literally:</strong> Put boundary conditions directly into criteria; cannot infer unstated nuances.</li>
+              <li><strong>Not a calculator:</strong> Math, counting, and date arithmetic fail consistently. Keep math in code.</li>
+              <li><strong>State noise sensitivity:</strong> Adding irrelevant text to state significantly lowers classification accuracy.</li>
+              <li><strong>Prompt injection vulnerability:</strong> Malicious text in state can bias probabilities if questions lack defensive framing.</li>
+              <li><strong>No explanations:</strong> Returns only a label and probability; no reasoning trace to audit.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="slides.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
