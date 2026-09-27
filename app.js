@@ -1,7 +1,10 @@
 // Master Application Engine for Jev Talk & Interactive Research Workbench
 let currentSlideIndex = 0;
 let viewMode = 'split'; // 'split' (Slide + Pro Dossier) or 'focus' (Slide Only)
-const slides = window.SLIDES_DATA;
+
+function getSlides() {
+  return (window.SLIDES_DATA && Array.isArray(window.SLIDES_DATA)) ? window.SLIDES_DATA : [];
+}
 
 // Audio click sound using Web Audio API
 let audioCtx = null;
@@ -24,8 +27,15 @@ function playTick(freq = 800, duration = 0.02) {
   }
 }
 
-// Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize Application Safely
+function initApp() {
+  const slides = getSlides();
+  if (!slides || !slides.length) {
+    // If slides.js is still parsing or loading, retry shortly
+    setTimeout(initApp, 50);
+    return;
+  }
+
   // If on mobile device, default to focus mode so user gets full 16:9 card experience immediately
   if (window.innerWidth < 768) {
     viewMode = 'focus';
@@ -39,11 +49,21 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSlide(0);
   setupEventListeners();
   populateSlideMenu();
-});
+}
+
+// Execute immediately if DOM is already ready, or on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Render Slide
 function renderSlide(index, direction = 'next') {
-  if (index < 0 || index >= slides.length) return;
+  const slides = getSlides();
+  if (!slides || !slides.length) return;
+  if (index < 0) index = 0;
+  if (index >= slides.length) index = slides.length - 1;
   currentSlideIndex = index;
 
   const slide = slides[index];
@@ -198,6 +218,7 @@ function toggleViewMode(forcedMode) {
 
 // Navigation Functions
 function nextSlide() {
+  const slides = getSlides();
   if (currentSlideIndex < slides.length - 1) {
     playTick(900);
     renderSlide(currentSlideIndex + 1, 'next');
@@ -258,7 +279,8 @@ function setupEventListeners() {
 // Populate Jump-to-Slide Menu
 function populateSlideMenu() {
   const list = document.getElementById('slide-menu-list');
-  if (!list) return;
+  const slides = getSlides();
+  if (!list || !slides.length) return;
 
   list.innerHTML = slides.map((s, idx) => `
     <div onclick="goToSlide(${idx})" class="p-2.5 rounded-lg hover:bg-gray-800/80 cursor-pointer flex items-center justify-between text-xs font-mono transition-colors ${idx === currentSlideIndex ? 'text-lime bg-lime/10' : 'text-gray-300'}">
