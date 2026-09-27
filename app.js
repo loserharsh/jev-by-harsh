@@ -175,11 +175,6 @@ function renderSlide(index, direction = 'next') {
   progressBar.style.width = `${pct}%`;
 
   // Render Dots
-  let dotCount = 1;
-  if (slide.subIndex.includes('.')) {
-    const subNum = parseInt(slide.subIndex.split('.')[1]);
-    dotCount = isNaN(subNum) ? 1 : Math.min(subNum, 4);
-  }
   dotsContainer.innerHTML = Array(dotCount).fill('<div class="nav-dot active"></div>').join('');
 
   // Update window hash
