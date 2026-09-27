@@ -26,6 +26,16 @@ function playTick(freq = 800, duration = 0.02) {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+  // If on mobile device, default to focus mode so user gets full 16:9 card experience immediately
+  if (window.innerWidth < 768) {
+    viewMode = 'focus';
+    const splitBtn = document.getElementById('btn-mode-split');
+    const focusBtn = document.getElementById('btn-mode-focus');
+    if (splitBtn && focusBtn) {
+      splitBtn.classList.remove('active');
+      focusBtn.classList.add('active');
+    }
+  }
   renderSlide(0);
   setupEventListeners();
   populateSlideMenu();
@@ -61,14 +71,32 @@ function renderSlide(index, direction = 'next') {
     badgeEl.innerHTML = '';
   }
 
+  // Calculate Card Dots for this slide (matching reference screenshot)
+  let dotCount = 1;
+  if (slide.subIndex.includes('.')) {
+    const subNum = parseInt(slide.subIndex.split('.')[1]);
+    dotCount = isNaN(subNum) ? 1 : Math.min(subNum, 4);
+  } else if (slide.id === '2') {
+    dotCount = 2;
+  }
+  const cardDotsHtml = Array(dotCount).fill('<span class="slide-card-dot"></span>').join('');
+
   // Build Dual or Focus Layout
   let contentHtml = '';
   if (viewMode === 'split') {
     contentHtml = `
       <div class="dual-layout-grid">
         <!-- Left Column: Visual Slide Presentation Box -->
-        <div class="slide-visual-box flex flex-col justify-center min-h-[420px]">
-          ${slide.visualHtml}
+        <div class="slide-visual-box flex flex-col justify-between">
+          <div class="slide-visual-body flex-1 flex flex-col justify-center">
+            ${slide.visualHtml}
+          </div>
+          <div class="slide-card-footer">
+            <span class="slide-card-subindex">${slide.subIndex}</span>
+            <div class="slide-card-dots">
+              ${cardDotsHtml}
+            </div>
+          </div>
         </div>
 
         <!-- Right Column: Pro Expert Engineering Dossier -->
@@ -104,8 +132,16 @@ function renderSlide(index, direction = 'next') {
     // Focus Slide View
     contentHtml = `
       <div class="max-w-4xl mx-auto space-y-6">
-        <div class="slide-visual-box min-h-[460px] flex flex-col justify-center">
-          ${slide.visualHtml}
+        <div class="slide-visual-box flex flex-col justify-between min-h-[380px] md:min-h-[460px]">
+          <div class="slide-visual-body flex-1 flex flex-col justify-center">
+            ${slide.visualHtml}
+          </div>
+          <div class="slide-card-footer">
+            <span class="slide-card-subindex">${slide.subIndex}</span>
+            <div class="slide-card-dots">
+              ${cardDotsHtml}
+            </div>
+          </div>
         </div>
         <div class="flex justify-center items-center gap-4">
           <button onclick="toggleViewMode('split')" class="btn-pill btn-pill-lime">
@@ -203,16 +239,24 @@ function setupEventListeners() {
     }
   });
 
-  // Touch Swipe
+  // Enhanced Mobile Touch Swipe (respects vertical scrolling)
   let touchStartX = 0;
+  let touchStartY = 0;
   window.addEventListener('touchstart', (e) => {
     touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
   }, { passive: true });
 
   window.addEventListener('touchend', (e) => {
     const touchEndX = e.changedTouches[0].screenX;
-    if (touchStartX - touchEndX > 50) nextSlide();
-    else if (touchEndX - touchStartX > 50) prevSlide();
+    const touchEndY = e.changedTouches[0].screenY;
+    const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
+    // Only navigate if horizontal swipe is clearly dominant over vertical scroll
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) nextSlide();
+      else prevSlide();
+    }
   }, { passive: true });
 }
 

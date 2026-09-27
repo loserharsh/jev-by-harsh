@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Jev by TypeSafe AI — Interactive Talk & Pro Research Dossier</title>
   
   <!-- Tailwind CSS CDN -->
@@ -13,19 +13,21 @@
         extend: {
           colors: {
             lime: {
-              DEFAULT: '#b4f34d',
-              dim: 'rgba(180, 243, 77, 0.15)',
-              glow: 'rgba(180, 243, 77, 0.35)',
+              DEFAULT: '#c6ff3e',
+              bright: '#c6ff3e',
+              dim: 'rgba(198, 255, 62, 0.15)',
+              glow: 'rgba(198, 255, 62, 0.35)',
             },
             dark: {
-              900: '#090a0d',
+              950: '#07080a',
+              900: '#0a0b0e',
               800: '#11131a',
               700: '#191d26',
               600: '#232936',
             }
           },
           fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
           }
         }
@@ -41,50 +43,50 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#090a0d] text-gray-100 antialiased select-none overflow-hidden">
+<body class="bg-[#0a0b0e] text-gray-100 antialiased select-none overflow-hidden">
 
   <!-- App Root Container -->
   <div id="app-root" class="relative w-screen h-screen flex flex-col justify-between">
 
     <!-- Top Global App Bar -->
-    <header class="h-14 border-b border-gray-800/80 px-4 md:px-8 flex items-center justify-between bg-[#090a0d]/90 backdrop-blur-md z-40">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-lime/10 border border-lime flex items-center justify-center">
+    <header class="h-14 border-b border-gray-800/80 px-3 md:px-8 flex items-center justify-between bg-[#0a0b0e]/95 backdrop-blur-md z-40">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="w-8 h-8 rounded-lg bg-lime/10 border border-lime flex items-center justify-center shrink-0">
           <span class="font-mono font-black text-lime text-base tracking-tighter">J</span>
         </div>
-        <div class="flex items-baseline gap-2">
+        <div class="flex items-baseline gap-1.5 sm:gap-2">
           <span class="font-bold text-white tracking-tight text-base">Jev</span>
-          <span class="text-xs font-mono text-gray-400">by TypeSafe AI</span>
+          <span class="text-xs font-mono text-gray-400 hidden sm:inline">by TypeSafe AI</span>
         </div>
-        <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-lime/10 text-lime border border-lime/30 font-bold">
+        <span class="hidden md:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-lime/10 text-lime border border-lime/30 font-bold">
           SYSTEM 1 MODEL
         </span>
       </div>
 
       <!-- Mode Switcher & Tools -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-1.5 sm:gap-2.5">
         <!-- View Mode Switcher -->
         <div class="mode-toggle-group">
-          <button id="btn-mode-split" onclick="toggleViewMode('split')" class="mode-toggle-btn active">
-            🔬 Pro Split View
+          <button id="btn-mode-split" onclick="toggleViewMode('split')" class="mode-toggle-btn active" title="Pro Split View">
+            <span class="hidden sm:inline">🔬 </span>Split
           </button>
-          <button id="btn-mode-focus" onclick="toggleViewMode('focus')" class="mode-toggle-btn">
-            ⛶ Slide Focus
+          <button id="btn-mode-focus" onclick="toggleViewMode('focus')" class="mode-toggle-btn" title="Slide Focus View">
+            <span class="hidden sm:inline">⛶ </span>Focus
           </button>
         </div>
 
-        <button onclick="toggleSlideMenu(true)" class="btn-pill">
+        <button onclick="toggleSlideMenu(true)" class="btn-pill" title="Slide Index">
           <span>📑</span>
           <span class="hidden md:inline">Index</span>
-          <span class="text-xs font-mono text-lime font-bold">44 Slides</span>
+          <span class="text-xs font-mono text-lime font-bold">44<span class="hidden md:inline"> Slides</span></span>
         </button>
 
-        <button onclick="toggleDrawer(true)" class="btn-pill btn-pill-lime">
+        <button onclick="toggleDrawer(true)" class="btn-pill btn-pill-lime" title="Research Workbench">
           <span>🔬</span>
           <span class="hidden sm:inline">Workbench</span>
         </button>
 
-        <button onclick="toggleFullscreen()" class="btn-icon" title="Toggle Fullscreen">
+        <button onclick="toggleFullscreen()" class="btn-icon hidden sm:flex" title="Toggle Fullscreen">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
           </svg>
@@ -116,8 +118,8 @@
       <div id="progress-bar" class="progress-track" style="width: 2.2%;"></div>
 
       <!-- Left controls: Prev/Next & Slide Subindex -->
-      <div class="flex items-center gap-3">
-        <button onclick="prevSlide()" class="btn-icon" title="Previous Slide (← / PageUp)">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="prevSlide()" class="btn-icon" title="Previous Slide (← / PageUp)" aria-label="Previous Slide">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -127,7 +129,7 @@
           <span id="nav-counter-text" class="font-bold text-white font-mono text-sm tracking-wide">1 / 16</span>
         </div>
 
-        <button onclick="nextSlide()" class="btn-icon" title="Next Slide (→ / Spacebar)">
+        <button onclick="nextSlide()" class="btn-icon" title="Next Slide (→ / Spacebar)" aria-label="Next Slide">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
@@ -186,20 +188,20 @@
       </div>
 
       <!-- Drawer Tabs -->
-      <div class="flex border-b border-gray-800 bg-[#11131a] px-4 gap-2 overflow-x-auto text-xs font-mono">
-        <button onclick="switchTab('arch')" class="tab-btn active py-3 px-3 border-b-2 border-lime text-lime font-bold hover:text-white" data-tab="arch">
+      <div class="flex border-b border-gray-800 bg-[#11131a] px-3 sm:px-4 gap-1 sm:gap-2 overflow-x-auto text-xs font-mono whitespace-nowrap">
+        <button onclick="switchTab('arch')" class="tab-btn active py-3 px-3 border-b-2 border-lime text-lime font-bold hover:text-white shrink-0" data-tab="arch">
           1. Architecture Unmasked
         </button>
-        <button onclick="switchTab('bench')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="bench">
+        <button onclick="switchTab('bench')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white shrink-0" data-tab="bench">
           2. JevBench Leaderboard
         </button>
-        <button onclick="switchTab('clones')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="clones">
+        <button onclick="switchTab('clones')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white shrink-0" data-tab="clones">
           3. Open Clones (Laya & Kev)
         </button>
-        <button onclick="switchTab('campusx')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="campusx">
+        <button onclick="switchTab('campusx')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white shrink-0" data-tab="campusx">
           4. Live CampusX Sandbox
         </button>
-        <button onclick="switchTab('demos')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white" data-tab="demos">
+        <button onclick="switchTab('demos')" class="tab-btn py-3 px-3 border-b-2 border-transparent text-gray-400 hover:text-white shrink-0" data-tab="demos">
           5. Community Demos & Limits
         </button>
       </div>
@@ -274,8 +276,8 @@
             <p class="text-xs text-gray-400 mt-1">Source: <code class="text-gray-300">benchmarkheaven.com/jev-models</code> · Evaluated on 4 equal 25% axes</p>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left font-mono text-xs border border-gray-800">
+          <div class="overflow-x-auto -mx-2 sm:mx-0">
+            <table class="w-full text-left font-mono text-xs border border-gray-800 min-w-[620px]">
               <thead class="bg-[#141720] text-gray-400">
                 <tr>
                   <th class="p-2.5">Rank</th>

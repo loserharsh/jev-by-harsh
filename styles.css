@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #090a0d;
-  --bg-card: #12141a;
-  --bg-card-hover: #181b24;
-  --bg-expert: #0e1017;
-  --accent-lime: #b4f34d;
-  --accent-lime-dim: rgba(180, 243, 77, 0.12);
-  --accent-lime-glow: rgba(180, 243, 77, 0.35);
+  --bg-primary: #0a0b0e;
+  --bg-card: #101218;
+  --bg-card-hover: #161922;
+  --bg-expert: #0d0f15;
+  --accent-lime: #c6ff3e;
+  --accent-lime-dim: rgba(198, 255, 62, 0.14);
+  --accent-lime-glow: rgba(198, 255, 62, 0.4);
   --accent-blue: #38bdf8;
   --accent-purple: #c084fc;
   --accent-amber: #fbbf24;
@@ -15,10 +15,10 @@
   --text-main: #f3f4f6;
   --text-muted: #848a9a;
   --text-dim: #4b5263;
-  --border-subtle: #1f2430;
-  --border-active: #2e3649;
-  --border-lime: rgba(180, 243, 77, 0.4);
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --border-subtle: #1c202a;
+  --border-active: #2b3345;
+  --border-lime: rgba(198, 255, 62, 0.4);
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
@@ -34,6 +34,7 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   -webkit-font-smoothing: antialiased;
 }
@@ -71,12 +72,27 @@ body {
 #slide-viewport {
   position: relative;
   width: 100vw;
-  height: calc(100vh - 106px); /* 100vh - top bar (54px) - bottom bar (52px) */
+  height: calc(100vh - 106px);
+  height: calc(100dvh - 106px);
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   justify-content: center;
-  padding: 1.5rem 2rem 3rem 2rem;
+  padding: 0.85rem 0.75rem 2.75rem 0.75rem;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+@media (min-width: 640px) {
+  #slide-viewport {
+    padding: 1.25rem 1.25rem 2.75rem 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #slide-viewport {
+    padding: 1.5rem 2rem 3rem 2rem;
+  }
 }
 
 .slide-wrapper {
@@ -103,19 +119,31 @@ body {
 @media (max-width: 1024px) {
   .dual-layout-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 }
 
-/* Slide Left Visual Box */
+/* Slide Left Visual Box (Card) */
 .slide-visual-box {
-  background: #0f1118;
-  border: 1px solid var(--border-subtle);
+  background: #0d0e14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 2.25rem 2.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  padding: 2.25rem 2.5rem 1.25rem 2.5rem;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 420px;
+}
+
+@media (max-width: 768px) {
+  .slide-visual-box {
+    padding: 1.5rem 1.25rem 1rem 1.25rem;
+    border-radius: 14px;
+    min-height: 330px;
+  }
 }
 
 /* Slide Right Expert Breakdown Box */
@@ -128,6 +156,13 @@ body {
   position: relative;
 }
 
+@media (max-width: 768px) {
+  .slide-expert-box {
+    padding: 1.5rem 1.25rem;
+    border-radius: 14px;
+  }
+}
+
 .expert-tag-badge {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -136,9 +171,9 @@ body {
   letter-spacing: 0.08em;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
-  background: rgba(180, 243, 77, 0.12);
+  background: rgba(198, 255, 62, 0.14);
   color: var(--accent-lime);
-  border: 1px solid rgba(180, 243, 77, 0.3);
+  border: 1px solid rgba(198, 255, 62, 0.3);
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -179,14 +214,14 @@ body {
 }
 
 .badge-live {
-  background: rgba(180, 243, 77, 0.15);
+  background: rgba(198, 255, 62, 0.15);
   color: var(--accent-lime);
   border: 1px solid var(--accent-lime);
   animation: pulse-badge 2s infinite;
 }
 
 .badge-confirmed {
-  background: rgba(180, 243, 77, 0.15);
+  background: rgba(198, 255, 62, 0.15);
   color: var(--accent-lime);
   border: 1px solid var(--accent-lime);
 }
@@ -222,7 +257,7 @@ body {
 
 /* Typography */
 .slide-title-hero {
-  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+  font-size: clamp(2rem, 5.2vw, 3.8rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.08;
@@ -230,10 +265,10 @@ body {
 }
 
 .slide-subtitle-hero {
-  font-size: clamp(1.2rem, 2.2vw, 1.7rem);
-  font-weight: 400;
-  color: var(--text-muted);
-  line-height: 1.45;
+  font-size: clamp(1.15rem, 2.5vw, 1.75rem);
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.4;
 }
 
 /* Watermarks */
@@ -241,14 +276,50 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.04;
+  opacity: 0.12;
   display: flex;
   flex-wrap: wrap;
-  gap: 2.5rem;
-  padding: 2rem;
+  gap: 1.25rem;
+  padding: 1.25rem;
   font-family: var(--font-mono);
-  font-size: 1.35rem;
+  font-size: clamp(0.85rem, 2vw, 1.3rem);
+  color: #94a3b8;
   overflow: hidden;
+  user-select: none;
+}
+
+/* Built-in Slide Card Footer (matching screenshot) */
+.slide-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.slide-card-subindex {
+  color: #6b7280;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.slide-card-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.slide-card-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--accent-lime);
+  box-shadow: 0 0 6px var(--accent-lime);
+  display: inline-block;
 }
 
 /* Cards & Flow Components */
@@ -298,14 +369,21 @@ body {
   left: 0;
   right: 0;
   height: 52px;
-  background: rgba(9, 10, 13, 0.95);
+  background: rgba(10, 11, 14, 0.95);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 1rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .bottom-nav-bar {
+    padding: 0 2rem;
+  }
 }
 
 .progress-track {
@@ -457,6 +535,13 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: -15px 0 45px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .drawer-panel {
+    width: 100vw;
+    border-left: none;
+  }
 }
 
 .drawer-active .drawer-backdrop {
